@@ -100,7 +100,7 @@ t_token	*create_new_token(char *str)
 		free(new);
 		return (NULL);
 	}
-	new->tipo = 1;
+	new->type = 1;
 	new->prev = NULL;
 	new->next = NULL;
 	return (new);
@@ -122,33 +122,51 @@ void	add_token_back(t_token **head, t_token *new)
 	new->prev = last;
 }
 
-int	main(int argc, char **argv)
-{
-	char	**args;
-	t_token	*head;
-	t_token	*new;
-	int		i;
 
-	i = 0;
-	head = NULL;
-	if (argc < 2)
-		return (1);
-	args = ft_split(argv[1], ' ');
-	if (!args)
-		return (1);
-	while (args[i] != NULL)
-	{
-		new = create_new_token(args[i]);
-		if (!new)
-			return (1);
-		add_token_back(&head, new);
-		i++;
+int main()
+{
+	char *line;
+	t_token *token;
+	// line = cell_read_line();
+	// token = tokenize(line);
+	while ((line = cell_read_line())){
+		token = tokenize(line);
+		// printf("%s", token->str);
+		execute_from_list(token);
+		// printf("%s\n", line);
 	}
-	free_args(args);
-	if (head && head->tipo == 1)
-		execute_from_list(head);
-	free_tokens(head);
-	return (0);
 }
+
+
+
+
+// int	main(int argc, char **argv)
+// {
+// 	char	**args;
+// 	t_token	*head;
+// 	t_token	*new;
+// 	int		i;
+
+// 	i = 0;
+// 	head = NULL;
+// 	if (argc < 2)
+// 		return (1);
+// 	args = ft_split(argv[1], ' ');
+// 	if (!args)
+// 		return (1);
+// 	while (args[i] != NULL)
+// 	{
+// 		new = create_new_token(args[i]);
+// 		if (!new)
+// 			return (1);
+// 		add_token_back(&head, new);
+// 		i++;
+// 	}
+// 	free_args(args);
+// 	if (head && head->type == 1)
+// 		execute_from_list(head);
+// 	free_tokens(head);
+// 	return (0);
+// }
 
 

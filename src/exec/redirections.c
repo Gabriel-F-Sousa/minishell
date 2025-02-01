@@ -75,33 +75,37 @@ int handle_redirections(t_token *head)
 	current = head;
 	while (current)
 	{
-		if (current->tipo == TOKEN_REDIR_IN && current->next)
+		if (current->type == TOKEN_REDIR_IN && current->next)
 		{
 			fd = handle_input_redirection(current->next->str);
 			if (fd < 0)
 				return (1);
-			current->fd_in = fd;
+			// current->fd_in = fd;
+			head->fd_in = fd;
 		}
-		else if (current->tipo == TOKEN_REDIR_OUT && current->next)
+		else if (current->type == TOKEN_REDIR_OUT && current->next)
 		{
 			fd = handle_output_redirection(current->next->str, 0);
 			if (fd < 0)
 				return (1);
-			current->fd_out = fd;
+			// current->fd_out = fd;
+			head->fd_out = fd;
 		}
-		else if (current->tipo == TOKEN_HEREDOC && current->next)
+		else if (current->type == TOKEN_HEREDOC && current->next)
 		{
 			fd = handle_heredoc(current->next->str);
 			if (fd < 0)
 				return (1);
-			current->fd_in = fd;
+			// current->fd_in = fd;
+			head->fd_in = fd;
 		}
-		else if (current->tipo == TOKEN_APPEND && current->next)
+		else if (current->type == TOKEN_APPEND && current->next)
 		{
 			fd = handle_output_redirection(current->next->str, 1);
 			if (fd < 0)
 				return (1);
-			current->fd_out = fd;
+			// current->fd_out = fd;
+			head->fd_out = fd;
 		}
 		current = current->next;
 	}

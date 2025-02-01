@@ -3,7 +3,8 @@ LIBFT = $(LIBFT_PATH)/libft.a
 PRINTF_PATH = lib/ft_printf
 PRINTF = $(PRINTF_PATH)/ft_printf.a
 
-SRC_FILES = src/main.c src/exec/exec.c src/exec/redirections.c
+SRC_FILES = src/main.c src/exec/exec.c src/exec/redirections.c \
+			src/pars/space_prompt.c src/pars/tokens_func.c src/pars/tokens_type.c src/pars/minishell.c
 
 SOURCES = $(SRC_FILES)
 OBJECTS = $(SOURCES:.c=.o)
@@ -13,7 +14,8 @@ NAME = minishell
 
 CC = cc
 RM = rm -f
-CFLAGS = -g -Wall -Wextra -Werror
+# CFLAGS = -g -Wall -Wextra -Werror
+CFLAGS = -g 
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $(<:.c=.o)
