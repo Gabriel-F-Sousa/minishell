@@ -13,16 +13,17 @@ char	*cell_read_line(void)
 	char	cwd[50];
 
 	buf = NULL;
-
+	bufsize = 0;
 	Getcwd(cwd, sizeof(cwd));
-	p(C" %s "RST"$>", cwd);
+	ft_printf(C" %s "RST"$> ", cwd);
+	
 	if (getline(&buf, &bufsize, stdin) == -1)
 	{
-		buf = NULL;
+		free(buf);  // Free buf if getline fails
 		if (feof(stdin))
-			p(RED"[EOF]"RST);
-		else
-			p(RED"Getline failed"RST);
+			return (NULL);  // Return NULL on EOF
+		ft_printf(RED"Getline failed"RST);
+		return (NULL);
 	}
 	return (buf);
 }

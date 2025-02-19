@@ -67,27 +67,47 @@ typedef struct s_shell
 // 	int fd_out;    // For output redirection
 // } t_token;
 
+// exec.c
+void			free_args(char **args);
+int				count_args(t_token *head);
+char			**create_args_array(t_token *head, int arg_count);
+void			check_and_execute(char *cmd_path, char **args, t_token *head);
+int				execute_from_list(t_token *head);
 
-int		execute_from_list(t_token *head);
-char	*find_command(char *cmd);
-void	free_args(char **args);
+// pipe_utils.c
+int				count_piped_commands(t_token *head);
+t_token			*find_command_end(t_token *start);
+void			setup_pipes(int *pipe_fd, int *prev_pipe, int is_last);
+void			cleanup_pipes(int *pipe_fd, int *prev_pipe, int is_last);
 
-// redirections.c
-int handle_redirections(t_token *head);
-int handle_input_redirection(char *file);
-int handle_output_redirection(char *file, int append);
-int handle_heredoc(char *delimiter);
+// pipe_exec.c
+int				setup_child_pipes(int pipe_in, int pipe_out);
+void			close_parent_pipes(int pipe_in, int pipe_out);
+int				execute_piped_command(t_token *start, int pipe_in, int pipe_out);
 
-// parsing
-void	Getcwd(char *buf, size_t size);
+// command_utils.c
+t_token			*get_next_command(t_token *current);
+void			handle_command(t_token *current, int *pipe_fd, 
+int				*prev_pipe, int is_last);
+int				count_command_args(t_token *start);
+char			**create_command_args(t_token *start);
 
-int yesspace(char c);
-char *norm_prompt(char *prompt);
-int if_special(char c);
-int	skip_space(const char *input, int i);
-int	skip_token_end(const char *input, int i);
-t_token	*create_token(const char *input, int start, int end, t_token *prev);
-t_token	*tokenize(char *input);
-t_token_type define_type(t_token *token, t_token *prev_token);
-char	*cell_read_line(void);
+// Common functions
+char			*find_command(char *cmd);
+int				handle_redirections(t_token *head);
+int				handle_input_redirection(char *file);
+int				handle_output_redirection(char *file, int append);
+int				handle_heredoc(char *delimiter);
+
+// Parsing functions
+void			Getcwd(char *buf, size_t size);
+int				yesspace(char c);
+char			*norm_prompt(char *prompt);
+int				if_special(char c);
+int				skip_space(const char *input, int i);
+int				skip_token_end(const char *input, int i);
+t_token			*create_token(const char *input, int start, int end, t_token *prev);
+t_token			*tokenize(char *input);
+t_token_type	define_type(t_token *token, t_token *prev_token);
+char			*cell_read_line(void);
 #endif

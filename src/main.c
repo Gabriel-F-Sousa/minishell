@@ -123,18 +123,37 @@ void	add_token_back(t_token **head, t_token *new)
 }
 
 
-int main()
+#include "minishell.h"
+
+int main(void)
 {
 	char *line;
 	t_token *token;
-	// line = cell_read_line();
-	// token = tokenize(line);
-	while ((line = cell_read_line())){
+
+	while (1)
+	{
+		line = cell_read_line();
+		if (!line)  // Handle Ctrl+D (EOF)
+		{
+			ft_printf("\n");
+			break;
+		}
+		
+		// Skip empty lines
+		if (line[0] == '\n' || line[0] == '\0')
+		{
+			free(line);
+			continue;
+		}
 		token = tokenize(line);
-		// printf("%s", token->str);
-		execute_from_list(token);
-		// printf("%s\n", line);
+		if (token)
+		{
+			execute_from_list(token);
+			free_tokens(token);
+		}
+		free(line);
 	}
+	return (0);
 }
 
 

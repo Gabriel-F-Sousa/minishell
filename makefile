@@ -4,6 +4,7 @@ PRINTF_PATH = lib/ft_printf
 PRINTF = $(PRINTF_PATH)/ft_printf.a
 
 SRC_FILES = src/main.c src/exec/exec.c src/exec/redirections.c \
+			src/exec/pipe_utils.c src/exec/pipe_exec.c src/exec/command_utils.c \
 			src/pars/space_prompt.c src/pars/tokens_func.c src/pars/tokens_type.c src/pars/minishell.c
 
 SOURCES = $(SRC_FILES)
@@ -14,7 +15,7 @@ NAME = minishell
 
 CC = cc
 RM = rm -f
-# CFLAGS = -g -Wall -Wextra -Werror
+CFLAGS = -g -Wall -Wextra -Werror
 CFLAGS = -g 
 
 .c.o:
