@@ -1,36 +1,59 @@
 #include "../minishell.h"
 
-void	debug_print_command(t_token *start, char **args)
+void	setup_command_fds(t_token *start, int pipe_in, int pipe_out)
 {
-	int	i;
+	int	stdin_fd;
+	int	stdout_fd;
 
-	ft_printf("Executing command: %s\n", start->str);
-	ft_printf("Arguments:\n");
-	i = 0;
-	while (args[i])
+	stdin_fd = pipe_in;
+	if (start->fd_in != -1)
+		stdin_fd = start->fd_in;
+	stdout_fd = pipe_out;
+	if (start->fd_out != -1)
+		stdout_fd = start->fd_out;
+	if (stdin_fd != -1)
 	{
-		ft_printf("  arg[%d]: %s\n", i, args[i]);
-		i++;
+		if (dup2(stdin_fd, STDIN_FILENO) == -1)
+			exit(1);
+		close(stdin_fd);
+	}
+	if (stdout_fd != -1)
+	{
+		if (dup2(stdout_fd, STDOUT_FILENO) == -1)
+			exit(1);
+		close(stdout_fd);
 	}
 }
 
-int	setup_child_pipes(int pipe_in, int pipe_out)
+void	execute_command(t_token *start)
 {
-	if (pipe_in != -1)
+	char	**args;
+	char	*cmd_path;
+
+	args = create_command_args(start);
+	if (!args || !args[0])
 	{
-		dup2(pipe_in, STDIN_FILENO);
-		close(pipe_in);
+		free_args(args);
+		exit(1);
 	}
-	if (pipe_out != -1)
+	cmd_path = find_command(args[0]);
+	if (cmd_path)
 	{
-		dup2(pipe_out, STDOUT_FILENO);
-		close(pipe_out);
+		execve(cmd_path, args, NULL);
+		free(cmd_path);
 	}
-	return (0);
+	else
+		ft_printf("minishell: %s: command not found\n", args[0]);
+	free_args(args);
+	exit(1);
 }
 
-void	close_parent_pipes(int pipe_in, int pipe_out)
+void	close_command_fds(t_token *start, int pipe_in, int pipe_out)
 {
+	if (start->fd_in != -1)
+		close(start->fd_in);
+	if (start->fd_out != -1)
+		close(start->fd_out);
 	if (pipe_in != -1)
 		close(pipe_in);
 	if (pipe_out != -1)
@@ -41,39 +64,19 @@ int	execute_piped_command(t_token *start, int pipe_in, int pipe_out)
 {
 	pid_t	pid;
 	int		status;
-	char	**args;
-	char	*cmd_path;
 
 	pid = fork();
 	if (pid == 0)
 	{
-		if (pipe_in != -1)
-		{
-			if (dup2(pipe_in, STDIN_FILENO) == -1)
-				exit(1);
-			close(pipe_in);
-		}
-		if (pipe_out != -1)
-		{
-			if (dup2(pipe_out, STDOUT_FILENO) == -1)
-				exit(1);
-			close(pipe_out);
-		}
-		args = create_command_args(start);
-		if (!args)
-			exit(1);
-		cmd_path = find_command(args[0]);
-		if (cmd_path)
-		{
-			execve(cmd_path, args, NULL);
-			free(cmd_path);
-		}
-		free_args(args);
-		exit(1);
+		setup_command_fds(start, pipe_in, pipe_out);
+		execute_command(start);
 	}
 	else if (pid < 0)
+	{
+		ft_printf("minishell: fork failed\n");
 		return (1);
-	close_parent_pipes(pipe_in, pipe_out);
+	}
+	close_command_fds(start, pipe_in, pipe_out);
 	waitpid(pid, &status, 0);
 	return (WEXITSTATUS(status));
 }

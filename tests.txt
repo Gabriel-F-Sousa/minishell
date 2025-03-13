@@ -1,0 +1,5 @@
+ls -l > output.txt
+cat < output.txt
+echo "Hello" >> output.txt
+cat < output.txt | grep "pattern" > results.txt
+ls -l | sort | head -n 5 > top_files.txt

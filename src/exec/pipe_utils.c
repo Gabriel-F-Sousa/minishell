@@ -1,4 +1,3 @@
-
 #include "../minishell.h"
 
 int	count_piped_commands(t_token *head)
@@ -24,33 +23,33 @@ t_token	*find_command_end(t_token *start)
 	current = start;
 	while (current && current->type != PIPE)
 		current = current->next;
-	if (current)
-		return (current->prev);
+	if (current && current->type == PIPE)
+		return (current);
 	return (current);
 }
 
-void	setup_pipes(int *pipe_fd, int *prev_pipe, int is_last)
+t_token	*get_next_command_after_pipe(t_token *current)
 {
-	if (!is_last)
+	current = current->next;
+	while (current && current->type != CMD)
 	{
-		if (pipe(pipe_fd) < 0)
-			ft_printf("Pipe creation failed\n");
+		if (current->type == PIPE)
+			return (NULL);
+		current = current->next;
 	}
-	if (*prev_pipe != -1)
-	{
-		dup2(*prev_pipe, STDIN_FILENO);
-		close(*prev_pipe);
-	}
+	return (current);
 }
 
-void	cleanup_pipes(int *pipe_fd, int *prev_pipe, int is_last)
+t_token	*get_next_command(t_token *current)
 {
-	if (!is_last)
+	if (!current || !current->next)
+		return (NULL);
+	if (current->type != PIPE)
 	{
-		if (pipe_fd[1] != -1)
-			close(pipe_fd[1]);
-		*prev_pipe = pipe_fd[0];
+		while (current && current->type != PIPE)
+			current = current->next;
+		if (!current || !current->next)
+			return (NULL);
 	}
-	if (*prev_pipe != -1)
-		close(*prev_pipe);
+	return (get_next_command_after_pipe(current));
 }

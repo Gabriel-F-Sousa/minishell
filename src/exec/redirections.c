@@ -1,5 +1,22 @@
-
 #include "../minishell.h"
+
+t_token	*find_redirection_command(t_token *redir)
+{
+	t_token	*cmd;
+
+	cmd = redir;
+	while (cmd && cmd->type != CMD && cmd->type != PIPE)
+		cmd = cmd->prev;
+	if (!cmd || cmd->type == PIPE)
+	{
+		cmd = redir;
+		while (cmd && cmd->type != CMD && cmd->type != PIPE)
+			cmd = cmd->next;
+		if (!cmd || cmd->type == PIPE)
+			return (NULL);
+	}
+	return (cmd);
+}
 
 int	handle_input_redirection(char *file)
 {
@@ -33,21 +50,19 @@ int	handle_output_redirection(char *file, int append)
 	return (fd);
 }
 
-int	handle_heredoc(char *delimiter)
+int	handle_heredoc_input(char *delimiter, int pipe_fd[2])
 {
-	int		pipe_fd[2];
 	char	*line;
 
-	if (pipe(pipe_fd) < 0)
-		return (-1);
+	ft_printf("heredoc> ");
 	while (1)
 	{
-		ft_printf("> ");
 		line = get_next_line(0);
 		if (!line)
 			break ;
-		line[ft_strlen(line) - 1] = '\0';
-		if (ft_strncmp(line, delimiter, ft_strlen(delimiter)) == 0)
+		if (line[ft_strlen(line) - 1] == '\n')
+			line[ft_strlen(line) - 1] = '\0';
+		if (ft_strncmp(line, delimiter, ft_strlen(delimiter) + 1) == 0)
 		{
 			free(line);
 			break ;
@@ -55,52 +70,7 @@ int	handle_heredoc(char *delimiter)
 		write(pipe_fd[1], line, ft_strlen(line));
 		write(pipe_fd[1], "\n", 1);
 		free(line);
-	}
-	close(pipe_fd[1]);
-	return (pipe_fd[0]);
-}
-
-int	handle_redirections(t_token *head)
-{
-	t_token	*current;
-	int		fd;
-
-	current = head;
-	while (current)
-	{
-		if (current->type == TOKEN_REDIR_IN && current->next)
-		{
-			fd = handle_input_redirection(current->next->str);
-			if (fd < 0)
-				return (1);
-			// current->fd_in = fd;
-			head->fd_in = fd;
-		}
-		else if (current->type == TOKEN_REDIR_OUT && current->next)
-		{
-			fd = handle_output_redirection(current->next->str, 0);
-			if (fd < 0)
-				return (1);
-			// current->fd_out = fd;
-			head->fd_out = fd;
-		}
-		else if (current->type == TOKEN_HEREDOC && current->next)
-		{
-			fd = handle_heredoc(current->next->str);
-			if (fd < 0)
-				return (1);
-			// current->fd_in = fd;
-			head->fd_in = fd;
-		}
-		else if (current->type == TOKEN_APPEND && current->next)
-		{
-			fd = handle_output_redirection(current->next->str, 1);
-			if (fd < 0)
-				return (1);
-			// current->fd_out = fd;
-			head->fd_out = fd;
-		}
-		current = current->next;
+		ft_printf("heredoc> ");
 	}
 	return (0);
 }
